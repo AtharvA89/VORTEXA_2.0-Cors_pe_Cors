@@ -170,32 +170,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                 </h3>
               )}
               <ul className="space-y-1">
-                <li>
-                  <button
-                    type="button"
-                    className={`flex items-center w-full px-3 py-2.5 rounded-lg text-left ${
-                      isCollapsed ? 'justify-center' : ''
-                    } ${expandedMenus.fields ? 'bg-blue-50 text-blue-700' : 'text-gray-700'} hover:bg-blue-50 hover:text-blue-700 transition-all duration-200`}
-                    onClick={() => toggleMenu('fields')}
-                  >
-                    <FontAwesomeIcon
-                      icon={faMap}
-                      className="w-5 h-5 text-gray-500 group-hover:text-blue-600"
-                    />
-                    {!isCollapsed && (
-                      <>
-                        <span className="ml-3 mr-auto font-medium">Fields</span>
-                        <FontAwesomeIcon
-                          icon={expandedMenus.fields ? faAngleDown : faAngleRight}
-                          className="w-4 h-4"
-                        />
-                      </>
-                    )}
-                  </button>
-
-                  {expandedMenus.fields && !isCollapsed && (
-                    <ul className="mt-1 pl-7 space-y-1">
-                      <li>
+              <li>
                         <Link
                           to="/create-field"
                           className={`flex items-center px-3 py-2 rounded-md ${
@@ -211,25 +186,6 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                           <span>Create New Field</span>
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          to="/field-list"
-                          className={`flex items-center px-3 py-2 rounded-md ${
-                            isActive('/field-list') 
-                              ? 'bg-blue-500 text-white font-medium' 
-                              : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'
-                          } transition-all duration-200`}
-                        >
-                          <FontAwesomeIcon
-                            icon={faLocationDot}
-                            className={`w-4 h-4 mr-2 ${isActive('/field-list') ? 'text-white' : 'text-gray-500'}`}
-                          />
-                          <span>My Fields</span>
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </li>
               </ul>
             </div>
 

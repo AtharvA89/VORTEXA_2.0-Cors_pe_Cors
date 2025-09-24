@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import ChatbotButton from '../common/ChatbotButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -69,14 +68,13 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-100 border-r border-green-200 shadow-sm overflow-hidden">
-      <Navbar />
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-100 border-r border-blue-200 shadow-sm overflow-hidden">
       
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         type="button"
-        className="md:hidden fixed bottom-6 left-6 z-50 inline-flex items-center p-2 text-sm rounded-full bg-green-600 text-white hover:bg-green-700 w-14 h-14 justify-center shadow-xl"
+        className="md:hidden fixed bottom-6 left-6 z-50 inline-flex items-center p-2 text-sm rounded-full bg-blue-500 text-white hover:bg-blue-600 w-14 h-14 justify-center shadow-xl"
         aria-controls="sidebar"
         aria-expanded={sidebarOpen}
         aria-label="Toggle sidebar"
@@ -101,7 +99,7 @@ const Layout = ({ children }) => {
       <Sidebar isSidebarOpen={sidebarOpen} isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
       
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 mt-[60px] ${
+      <div className={`flex-1 transition-all duration-300 ${
         isMobile ? 'ml-0' : (isCollapsed ? 'md:ml-20' : 'md:ml-64')
       }`}>
         <main className="p-3 sm:p-4 md:p-6">

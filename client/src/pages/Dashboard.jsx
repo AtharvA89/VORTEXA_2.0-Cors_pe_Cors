@@ -81,45 +81,16 @@ const Dashboard = () => {
   }, [selectedField, fields]);
 
   const getHealthStatusColor = (value) => {
-    if (value >= 0.7) return 'bg-green-500';
+    if (value >= 0.7) return 'bg-blue-500';
     if (value >= 0.5) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div className="flex items-center mb-4 sm:mb-0">
-          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg flex items-center justify-center shadow-lg mr-4">
-            <FontAwesomeIcon icon={faTractor} className="text-2xl" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Farm Dashboard</h2>
-            <p className="text-sm text-gray-500">Overview of your agricultural operations</p>
-          </div>
-        </div>
-        
-        <div className="inline-flex items-center space-x-3">
-          <span className="text-sm text-gray-600">
-            Last updated: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-          <button 
-            className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-md transition duration-200 flex items-center"
-            onClick={() => {
-              refreshFields();
-              setLoading(true);
-              setTimeout(() => setLoading(false), 500);
-            }}
-          >
-            <FontAwesomeIcon icon={faRefresh} className="mr-2" />
-            <span>Refresh</span>
-          </button>
-        </div>
-      </div>
-      
       {loading ? (
         <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-          <div className="w-16 h-16 mx-auto mb-6 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-16 h-16 mx-auto mb-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">Loading farm data...</p>
           <p className="text-sm text-gray-500 mt-2">Please wait while we fetch the latest information</p>
         </div>
@@ -129,7 +100,7 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-gray-100">
               <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 text-green-600" />
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 text-blue-600" />
                 Farm Overview
               </h3>
               <div className="mt-2 sm:mt-0 flex items-center gap-4">
@@ -138,7 +109,7 @@ const Dashboard = () => {
                   <label htmlFor="field-select" className="mr-2 text-sm text-gray-500">Select Field:</label>
                   <select
                     id="field-select"
-                    className="py-1 px-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="py-1 px-2 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={selectedField || ''}
                     onChange={(e) => setSelectedField(e.target.value)}
                   >
@@ -152,7 +123,7 @@ const Dashboard = () => {
                 </div> */}
                 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm bg-green-100 text-green-800 py-1 px-3 rounded-full font-medium">
+                  <span className="text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full font-medium">
                     Active Season
                   </span>
                   
@@ -170,16 +141,16 @@ const Dashboard = () => {
             {!fieldData ? (
               <div className="text-center py-8">
                 <div className="text-gray-500">No field selected or no fields available</div>
-                <Link to="/create-field" className="mt-2 inline-block text-green-600 hover:text-green-700">
+                <Link to="/create-field" className="mt-2 inline-block text-blue-600 hover:text-blue-700">
                   + Create a new field
                 </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-green-300 transition-colors">
+                <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-blue-300 transition-colors">
                   <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                      <FontAwesomeIcon icon={faSeedling} className="text-green-600" />
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <FontAwesomeIcon icon={faSeedling} className="text-blue-600" />
                     </div>
                     <div className="text-sm text-gray-500 font-medium">Field Name</div>
                   </div>

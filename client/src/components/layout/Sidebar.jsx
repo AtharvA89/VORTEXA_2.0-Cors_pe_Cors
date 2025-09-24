@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MdDashboard } from "react-icons/md";
@@ -99,6 +100,30 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  // Handler to collapse sidebar on link click if screen width < 600px
+const handleLinkClick = useCallback(() => {
+  if (window.innerWidth < 600 && isSidebarOpen) {
+    toggleSidebar(); // Collapse sidebar on small screens
+  }
+}, [isSidebarOpen, toggleSidebar]);
+
+// Attach the click handler to sidebar links using event delegation
+useEffect(() => {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+
+  function onLinkClick(event) {
+    // Only trigger when clicking on internal <Link> anchors
+    if (event.target.closest('a')) {
+      handleLinkClick();
+    }
+  }
+
+  sidebar.addEventListener('click', onLinkClick);
+  return () => sidebar.removeEventListener('click', onLinkClick);
+}, [handleLinkClick]);
+
 
   return (
     <aside 
@@ -351,7 +376,10 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
         </div>
       </div>
     </aside>
+    
   );
 };
+
+
 
 export default Sidebar;

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSeedling, 
   faLeaf, 
-  faFlowerDaffodil, 
+  faStar, 
   faWheatAwn,
   faCheckCircle,
   faClockRotateLeft,
@@ -53,7 +53,7 @@ const CropLifecycle = () => {
     {
       id: 3,
       name: 'Flowering',
-      icon: faFlowerDaffodil,
+      icon: faStar,
       status: 'active',
       progress: 65,
       duration: '20-30 days',

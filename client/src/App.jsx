@@ -34,15 +34,10 @@ function App() {
             <Route path="/financial-aid" element={<FinancialAid />} />
             <Route path="/water-management" element={<WaterManagement />} />
             <Route path="/irrigation" element={<WaterManagement />} />
-            <Route path="/reports" element={<h1>Reports Page (Coming Soon)</h1>} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
-            <Route path="/soil" element={<SoilLandAnalysis />} />
-            <Route path="/vegetation" element={<VegetationAnalysis />} />
-            <Route path="/monsoon" element={<WaterIrrigationAnalysis dateRange={{startDate: '2025-01-01', endDate: '2025-09-01'}} />} />
+            <Route path="/ai-assistant" element={<AIAssistant />} />            
             <Route path="/create-field" element={<CreateField />} />
             <Route path="/field-list" element={<Fields />} />
-            <Route path="/field-detail/:id" element={<FieldDetail />} />
-            <Route path="/plant-disease-detection" element={<PlantDiseaseDetection />} />
+            <Route path="/field-detail/:id" element={<FieldDetail />} />            
             <Route path="/crop-lifecycle" element={<CropLifecycle />} />
             <Route path="/crop-prediction" element={<CropPrediction />} />
             <Route path="/yield-prediction" element={<YieldPrediction />} />

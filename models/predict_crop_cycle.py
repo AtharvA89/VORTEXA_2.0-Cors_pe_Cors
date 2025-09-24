@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 print("Python version:", sys.version)
 print("Current working directory:", os.getcwd())
 
-def load_models(models_dir='d:/TECH_CODE/AL_ML_Udemy/vortexa/trained_models'):
+def load_models(models_dir='./trained_models'):
     
     try:
         # Check if models directory exists

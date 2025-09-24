@@ -1,4 +1,4 @@
-import { IconCirclePlusFilled, IconMail } from "@tabler/icons-react";
+import { IconPlant2, IconTractor } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,17 +18,17 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear">
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
+              tooltip="New Field"
+              className="bg-green-600 text-white hover:bg-green-700 hover:text-white active:bg-green-700 active:text-white min-w-8 duration-200 ease-linear">
+              <IconPlant2 />
+              <span>Add New Field</span>
             </SidebarMenuButton>
             <Button
               size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
+              className="size-8 group-data-[collapsible=icon]:opacity-0 bg-blue-600 hover:bg-blue-700 text-white"
               variant="outline">
-              <IconMail />
-              <span className="sr-only">Inbox</span>
+              <IconTractor />
+              <span className="sr-only">Equipment</span>
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>

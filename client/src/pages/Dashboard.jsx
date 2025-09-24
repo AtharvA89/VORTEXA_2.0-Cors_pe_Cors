@@ -5,6 +5,7 @@ import { CropDataTable } from "@/components/crop-data-table"
 import { FieldInputForm } from "@/components/field-input-form"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
+import { WeatherWidget } from "@/components/weather-widget"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -171,6 +172,15 @@ export default function Dashboard() {
                     </div>
                     <div className="space-y-4">
                       <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base">Weather Forecast</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                          <WeatherWidget />
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
                         <CardHeader className="pb-3">
                           <CardTitle className="text-base">Recent Activity</CardTitle>
                         </CardHeader>
@@ -240,7 +250,7 @@ export default function Dashboard() {
                           Manage all your agricultural fields, track crop progress, and monitor field operations.
                         </p>
                       </div>
-                      <CropDataTable data={fields} />
+                      
                     </div>
                   )}
                 </TabsContent>

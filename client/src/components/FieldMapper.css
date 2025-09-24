@@ -1,0 +1,105 @@
+.field-mapper {
+  @apply bg-white rounded-lg shadow-md p-6 max-w-6xl mx-auto;
+}
+
+.field-mapper-header {
+  @apply mb-6;
+}
+
+.field-mapper-header h2 {
+  @apply text-2xl font-bold mb-2 flex items-center text-green-700;
+}
+
+.field-mapper-header p {
+  @apply text-gray-600;
+}
+
+.field-mapper-container {
+  @apply grid grid-cols-1 md:grid-cols-12 gap-6;
+}
+
+.map-container {
+  @apply md:col-span-7 rounded-lg overflow-hidden border border-gray-300;
+  min-height: 500px;
+}
+
+.field-details {
+  @apply md:col-span-5 p-4 bg-gray-50 rounded-lg border border-gray-300;
+}
+
+.field-details h3 {
+  @apply text-xl font-semibold mb-4;
+}
+
+.field-form .form-group {
+  @apply mb-4;
+}
+
+.field-form label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-control {
+  @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+  focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500;
+}
+
+.coordinates-table {
+  @apply mt-6;
+}
+
+.coordinates-table h4 {
+  @apply text-sm font-semibold mb-2;
+}
+
+.table-responsive {
+  @apply overflow-x-auto border border-gray-200 rounded-md;
+}
+
+.table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.table th {
+  @apply px-3 py-2 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider;
+}
+
+.table td {
+  @apply px-3 py-2 whitespace-nowrap text-sm text-gray-500 border-t border-gray-200;
+}
+
+.button-group {
+  @apply flex space-x-4 mt-6;
+}
+
+.btn {
+  @apply inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-save {
+  @apply border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+.btn-clear {
+  @apply border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500;
+}
+
+.alert {
+  @apply mt-4 p-4 rounded-md border flex items-center justify-between;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-300 text-blue-700;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-300 text-green-700;
+}
+
+.alert-error {
+  @apply bg-red-50 border-red-300 text-red-700;
+}
+
+.alert-close {
+  @apply bg-transparent text-gray-400 hover:text-gray-600 focus:outline-none;
+}

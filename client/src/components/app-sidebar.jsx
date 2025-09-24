@@ -1,26 +1,31 @@
 import * as React from "react"
 import {
-  IconCamera,
+  IconPlant,
   IconChartBar,
   IconDashboard,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
+  IconCloud,
+  IconDeviceFloppy,
+  IconMapPins,
+  IconPlant2,
   IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
+  IconLeaf,
+  IconCalendarStats,
   IconReport,
   IconSearch,
   IconSettings,
   IconUsers,
+  IconSun,
+  IconDroplet,
+  IconTractor,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { NavCrops } from "@/components/nav-crops"
+
 import {
   Sidebar,
   SidebarContent,
@@ -33,9 +38,9 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "John Farmer",
+    email: "john@vortexa.com",
+    avatar: "/avatars/farmer.jpg",
   },
   navMain: [
     {
@@ -44,69 +49,69 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Crop Calendar",
       url: "#",
-      icon: IconListDetails,
+      icon: IconCalendarStats,
     },
     {
-      title: "Analytics",
+      title: "Field Analytics",
       url: "#",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Field Mapping",
       url: "#",
-      icon: IconFolder,
+      icon: IconMapPins,
     },
     {
-      title: "Team",
+      title: "Farm Team",
       url: "#",
       icon: IconUsers,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
+      title: "Weather Data",
+      icon: IconCloud,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Forecast",
           url: "#",
         },
         {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
+          title: "Historical Data",
           url: "#",
         },
       ],
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
+      title: "Irrigation",
+      icon: IconDroplet,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Schedules",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Water Usage",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Soil Analysis",
+      icon: IconDeviceFloppy,
+      url: "#",
+      items: [
+        {
+          title: "Current Reports",
+          url: "#",
+        },
+        {
+          title: "Historical Data",
           url: "#",
         },
       ],
@@ -131,19 +136,19 @@ const data = {
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Crop Library",
       url: "#",
-      icon: IconDatabase,
+      icon: IconPlant,
     },
     {
-      name: "Reports",
+      name: "Farm Reports",
       url: "#",
       icon: IconReport,
     },
     {
-      name: "Word Assistant",
+      name: "Equipment Log",
       url: "#",
-      icon: IconFileWord,
+      icon: IconTractor,
     },
   ],
 }
@@ -158,15 +163,16 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <IconLeaf className="!size-5 text-green-600" />
+                <span className="text-base font-semibold">Vortexa Farm</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </SidebarMenu>        
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavCrops />
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

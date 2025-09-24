@@ -16,6 +16,12 @@ import {
 
 const CropLifecycle = () => {
   const [selectedField, setSelectedField] = useState('north-field');
+  const [showPredictionForm, setShowPredictionForm] = useState(false);
+  const [cropName, setCropName] = useState('');
+  const [sowingDate, setSowingDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [predictionResult, setPredictionResult] = useState(null);
+  const [error, setError] = useState('');
   
   const fields = [
     { id: 'north-field', name: 'North Field', crop: 'Wheat', area: '5.2 acres' },
@@ -109,6 +115,41 @@ const CropLifecycle = () => {
     }
   };
 
+  const handlePredictCrop = async () => {
+    if (!cropName || !sowingDate) {
+      setError('Please enter both crop name and sowing date');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5002/predict-crop-cycle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          crop_type: cropName,
+          sowing_date: sowingDate
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get crop prediction');
+      }
+
+      const result = await response.json();
+      setPredictionResult(result);
+      setShowPredictionForm(false);
+    } catch (err) {
+      setError('Error getting crop prediction: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const currentField = fields.find(f => f.id === selectedField);
   const activeStage = lifecycleStages.find(stage => stage.status === 'active');
 
@@ -162,6 +203,138 @@ const CropLifecycle = () => {
               <p className="text-xl font-bold text-gray-900">{currentField?.area}</p>
             </div>
           </div>
+        </div>
+
+        {/* Crop Prediction Form */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Crop Lifecycle Prediction</h2>
+            <button
+              onClick={() => setShowPredictionForm(!showPredictionForm)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center"
+            >
+              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              Add New Crop
+            </button>
+          </div>
+
+          {showPredictionForm && (
+            <div className="border-t pt-6 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Crop Name
+                  </label>
+                  <input
+                    type="text"
+                    value={cropName}
+                    onChange={(e) => setCropName(e.target.value)}
+                    placeholder="Enter crop name (e.g., Maize, Cotton, Wheat)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sowing Date
+                  </label>
+                  <input
+                    type="date"
+                    value={sowingDate}
+                    onChange={(e) => setSowingDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-6 space-x-3">
+                <button
+                  onClick={() => {
+                    setShowPredictionForm(false);
+                    setCropName('');
+                    setSowingDate('');
+                    setError('');
+                  }}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePredictCrop}
+                  disabled={isLoading}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                  {isLoading ? 'Predicting...' : 'Predict Lifecycle'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {predictionResult && (
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Prediction Results</h3>
+              <div className="bg-green-50 rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-gray-600">Crop</p>
+                    <p className="text-lg font-bold text-gray-900">{predictionResult.crop}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Harvest Date</p>
+                    <p className="text-lg font-bold text-gray-900">{predictionResult.harvest_date}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Total Duration</p>
+                    <p className="text-lg font-bold text-gray-900">{predictionResult.total_duration} days</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Growth Timeline</h4>
+                  <div className="space-y-3">
+                    {predictionResult.timeline?.map((stage, index) => (
+                      <div key={index} className="bg-white border rounded-lg p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-900">{stage.Stage}</p>
+                            <p className="text-sm text-gray-600">{stage.Start} to {stage.End}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">{stage.Duration_Days} days</p>
+                            <p className="text-xs text-blue-600">{stage.Irrigation_Need}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Weekly Irrigation Schedule</h4>
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {predictionResult.irrigation_schedule?.map((week, index) => (
+                      <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{week.Week_Start}</p>
+                            <p className="text-xs text-gray-600">{week.Stage}</p>
+                          </div>
+                          <p className="text-sm font-medium text-blue-600">{week.Irrigation_Need}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Current Stage Overview */}

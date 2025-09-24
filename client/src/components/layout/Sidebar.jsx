@@ -117,7 +117,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md">
                   <FontAwesomeIcon icon={faLeaf} className="text-blue-600 text-lg" />
                 </div>
-                <span className="font-bold text-white text-xl">Fasal Jeevan</span>
+                <span className="font-bold text-white text-xl">Krishi Mitra</span>
               </div>
             )}
             

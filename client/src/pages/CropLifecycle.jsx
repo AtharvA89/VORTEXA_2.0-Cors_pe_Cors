@@ -99,8 +99,8 @@ const CropLifecycle = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-100';
-      case 'active': return 'text-blue-600 bg-blue-100';
+      case 'completed': return 'text-green-700 bg-green-100';
+      case 'active': return 'text-amber-700 bg-amber-100';
       case 'upcoming': return 'text-gray-600 bg-gray-100';
       default: return 'text-gray-600 bg-gray-100';
     }
@@ -108,8 +108,8 @@ const CropLifecycle = () => {
 
   const getProgressColor = (status) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'active': return 'bg-blue-500';
+      case 'completed': return 'bg-green-600';
+      case 'active': return 'bg-amber-500';
       case 'upcoming': return 'bg-gray-300';
       default: return 'bg-gray-300';
     }
@@ -166,7 +166,7 @@ const CropLifecycle = () => {
             <select
               value={selectedField}
               onChange={(e) => setSelectedField(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               {fields.map(field => (
                 <option key={field.id} value={field.id}>{field.name}</option>
@@ -181,23 +181,23 @@ const CropLifecycle = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Field Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-blue-50 rounded-lg p-4">
+            <div className="bg-green-50 rounded-lg p-4">
               <div className="flex items-center mb-2">
-                <FontAwesomeIcon icon={faLeaf} className="text-blue-600 mr-2" />
+                <FontAwesomeIcon icon={faLeaf} className="text-green-700 mr-2" />
                 <span className="font-medium text-gray-900">Field Name</span>
               </div>
               <p className="text-xl font-bold text-gray-900">{currentField?.name}</p>
             </div>
-            <div className="bg-green-50 rounded-lg p-4">
+            <div className="bg-emerald-50 rounded-lg p-4">
               <div className="flex items-center mb-2">
-                <FontAwesomeIcon icon={faSeedling} className="text-green-600 mr-2" />
+                <FontAwesomeIcon icon={faSeedling} className="text-emerald-700 mr-2" />
                 <span className="font-medium text-gray-900">Crop Type</span>
               </div>
               <p className="text-xl font-bold text-gray-900">{currentField?.crop}</p>
             </div>
-            <div className="bg-purple-50 rounded-lg p-4">
+            <div className="bg-amber-50 rounded-lg p-4">
               <div className="flex items-center mb-2">
-                <FontAwesomeIcon icon={faWheatAwn} className="text-purple-600 mr-2" />
+                <FontAwesomeIcon icon={faWheatAwn} className="text-amber-700 mr-2" />
                 <span className="font-medium text-gray-900">Field Area</span>
               </div>
               <p className="text-xl font-bold text-gray-900">{currentField?.area}</p>
@@ -211,7 +211,7 @@ const CropLifecycle = () => {
             <h2 className="text-lg font-semibold text-gray-900">Crop Lifecycle Prediction</h2>
             <button
               onClick={() => setShowPredictionForm(!showPredictionForm)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
               Add New Crop
@@ -230,7 +230,7 @@ const CropLifecycle = () => {
                     value={cropName}
                     onChange={(e) => setCropName(e.target.value)}
                     placeholder="Enter crop name (e.g., Maize, Cotton, Wheat)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -241,7 +241,7 @@ const CropLifecycle = () => {
                     type="date"
                     value={sowingDate}
                     onChange={(e) => setSowingDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -308,7 +308,7 @@ const CropLifecycle = () => {
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-medium text-gray-900">{stage.Duration_Days} days</p>
-                            <p className="text-xs text-blue-600">{stage.Irrigation_Need}</p>
+                            <p className="text-xs text-green-700">{stage.Irrigation_Need}</p>
                           </div>
                         </div>
                       </div>
@@ -320,13 +320,13 @@ const CropLifecycle = () => {
                   <h4 className="font-semibold text-gray-900 mb-3">Weekly Irrigation Schedule</h4>
                   <div className="max-h-64 overflow-y-auto space-y-2">
                     {predictionResult.irrigation_schedule?.map((week, index) => (
-                      <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <div key={index} className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="text-sm font-medium text-gray-900">{week.Week_Start}</p>
                             <p className="text-xs text-gray-600">{week.Stage}</p>
                           </div>
-                          <p className="text-sm font-medium text-blue-600">{week.Irrigation_Need}</p>
+                          <p className="text-sm font-medium text-cyan-700">{week.Irrigation_Need}</p>
                         </div>
                       </div>
                     ))}
@@ -341,10 +341,10 @@ const CropLifecycle = () => {
         {activeStage && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Stage</h2>
-            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+            <div className="bg-green-50 rounded-lg p-6 border border-green-200">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
                     <FontAwesomeIcon icon={activeStage.icon} className="text-white text-lg" />
                   </div>
                   <div>
@@ -353,14 +353,14 @@ const CropLifecycle = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">{activeStage.progress}%</div>
+                  <div className="text-2xl font-bold text-green-700">{activeStage.progress}%</div>
                   <div className="text-sm text-gray-500">Complete</div>
                 </div>
               </div>
               
-              <div className="w-full bg-blue-200 rounded-full h-3 mb-4">
+              <div className="w-full bg-green-200 rounded-full h-3 mb-4">
                 <div 
-                  className="bg-blue-500 h-3 rounded-full transition-all duration-300" 
+                  className="bg-green-600 h-3 rounded-full transition-all duration-300" 
                   style={{ width: `${activeStage.progress}%` }}
                 ></div>
               </div>

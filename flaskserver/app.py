@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # ML Model Functions
-def load_models(models_dir='x:\\vortexa\\VORTEXA_2.0-Cors_pe_Cors\\models\\trained_models'):
+def load_models(models_dir='../models/trained_models'):
     try:
         if not os.path.exists(models_dir):
             print(f"ERROR: Models directory not found at {models_dir}")

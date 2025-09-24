@@ -102,7 +102,7 @@ const Layout = ({ children }) => {
       <div className={`flex-1 transition-all duration-300 ${
         isMobile ? 'ml-0' : (isCollapsed ? 'md:ml-20' : 'md:ml-64')
       }`}>
-        <main className="p-3 sm:p-4 md:p-6">
+        <main >
           <div className={`mx-auto transition-opacity duration-300 ${isPageTransitioning ? 'opacity-80' : 'opacity-100'}`}>
             {children}
           </div>

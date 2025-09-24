@@ -108,7 +108,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
       } ${isMobile ? 'w-[85vw] max-w-[300px]' : ''} ${!isMobile && isCollapsed ? 'md:w-20' : 'md:w-64'}` }
       aria-label="Sidebar"
     >
-      <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain scroll-smooth">
+      <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain scroll-smooth scrollbar-none">
         <div>
           {/* Top section with logo & collapse button */}
           <div className="flex items-center justify-between py-4 px-4 border-b border-blue-200 sticky top-0 bg-blue-600 z-10 shadow-md">
@@ -117,7 +117,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md">
                   <FontAwesomeIcon icon={faLeaf} className="text-blue-600 text-lg" />
                 </div>
-                <span className="font-bold text-white text-xl">Fasal Jeevan</span>
+                <span className="font-bold text-white text-xl">Krishi Mitra</span>
               </div>
             )}
             

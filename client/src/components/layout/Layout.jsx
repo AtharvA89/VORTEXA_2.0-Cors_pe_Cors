@@ -84,7 +84,7 @@ const Layout = ({ children }) => {
       </button>
       
       {/* Chatbot Button - available on all screen sizes */}
-      <ChatbotButton />
+      {/* <ChatbotButton /> */}
       
       {/* Dark Overlay - visible when mobile sidebar is open */}
       {sidebarOpen && isMobile && (

@@ -36,17 +36,31 @@ import {
   faHandshake,
   faRupeeSign,
   faWarehouse,
-  faMicroscope
+  faMicroscope,
+  faThermometerHalf,
+  faEye,
+  faCalendarCheck,
+  faCalculator,
+  faBell,
+  faHandHoldingDollar,
+  faGraduationCap,
+  faLifeRing,
+  faChartPie,
+  faCloudShowersHeavy,
+  faMapMarkedAlt,
+  faSearchDollar
 } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState({
-    analytics: true,
+    analytics: false,
     pests: false,
     crops: false,
     irrigation: false,
-    fields: false
+    fields: false,
+    financialAid: false,
+    climate: false
   });
   
   // Detect screen size for responsive behavior
@@ -97,10 +111,13 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
       <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain scroll-smooth">
         <div>
           {/* Top section with logo & collapse button */}
-          <div className="flex items-center justify-between py-3 px-4 border-b border-blue-200 sticky top-0 bg-gradient-to-r from-blue-500 to-blue-400 bg-opacity-95 backdrop-blur-sm z-10 shadow-md">
+          <div className="flex items-center justify-between py-4 px-4 border-b border-blue-200 sticky top-0 bg-blue-600 z-10 shadow-md">
             {!isCollapsed && (
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-white text-lg">Fasal Jeevan</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md">
+                  <FontAwesomeIcon icon={faLeaf} className="text-blue-600 text-lg" />
+                </div>
+                <span className="font-bold text-white text-xl">Fasal Jeevan</span>
               </div>
             )}
             
@@ -108,7 +125,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
             <button 
               onClick={toggleSidebar} 
               type="button" 
-              className={`${isCollapsed ? 'mx-auto' : ''} inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-blue-300 hover:text-white transition-colors`}
+              className={`${isCollapsed ? 'mx-auto' : ''} inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-blue-700 transition-colors duration-200`}
               aria-expanded={!isCollapsed}
               aria-label="Toggle sidebar collapse"
             >
@@ -118,52 +135,52 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
           </div>
           
           {/* Navigation Links */}
-          <nav className="mt-2">
-            <div className={`px-3 py-2 ${!isCollapsed && 'mb-1'}`}>
+          <nav className="mt-4 px-3">
+            {/* Main Dashboard */}
+            <div className="mb-4">
               {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider pl-2">
+                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 px-2">
                   Main
                 </h3>
               )}
-              <ul className="mt-1 space-y-1">
+              <ul className="space-y-1">
                 <li>
                   <Link
                     to="/"
-                    className={`flex items-center px-3 py-3 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
+                    className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
                       isActive('/') 
-                        ? 'bg-blue-100 text-blue-800 font-medium shadow-sm border-l-4 border-blue-500' 
-                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700'
-                    } group transition-all duration-200 ${isMobile ? 'active:bg-blue-100' : ''}`}
+                        ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    } group transition-all duration-200`}
                   >
                     <FontAwesomeIcon
                       icon={faHome}
-                      className={`w-5 h-5 ${isActive('/') ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-900'}`}
+                      className={`w-5 h-5 ${isActive('/') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
                     />
                     {!isCollapsed && <span className="ml-3 whitespace-nowrap">Dashboard</span>}
                   </Link>
                 </li>
-                
               </ul>
             </div>
-             {/* Field Management */}
-            <div className={`px-3 py-2 ${!isCollapsed && 'mb-1'}`}>
+            {/* Field Management */}
+            <div className="mb-4">
               {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider pl-2">
+                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 px-2">
                   Field Management
                 </h3>
               )}
-              <ul className="mt-1 space-y-1">
+              <ul className="space-y-1">
                 <li>
                   <button
                     type="button"
-                    className={`flex items-center w-full px-3 py-2.5 rounded-lg text-left text-gray-700 ${
+                    className={`flex items-center w-full px-3 py-2.5 rounded-lg text-left ${
                       isCollapsed ? 'justify-center' : ''
-                    } hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 ${expandedMenus.fields ? 'bg-blue-50 text-blue-700' : ''}`}
+                    } ${expandedMenus.fields ? 'bg-blue-50 text-blue-700' : 'text-gray-700'} hover:bg-blue-50 hover:text-blue-700 transition-all duration-200`}
                     onClick={() => toggleMenu('fields')}
                   >
                     <FontAwesomeIcon
                       icon={faMap}
-                      className="w-5 h-5 text-gray-500 group-hover:text-gray-900"
+                      className="w-5 h-5 text-gray-500 group-hover:text-blue-600"
                     />
                     {!isCollapsed && (
                       <>
@@ -183,13 +200,13 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                           to="/create-field"
                           className={`flex items-center px-3 py-2 rounded-md ${
                             isActive('/create-field') 
-                              ? 'bg-blue-100 text-blue-800 font-medium border-l-2 border-blue-500' 
+                              ? 'bg-blue-500 text-white font-medium' 
                               : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'
                           } transition-all duration-200`}
                         >
                           <FontAwesomeIcon
                             icon={faDraftingCompass}
-                            className={`w-4 h-4 mr-2 ${isActive('/create-field') ? 'text-blue-600' : 'text-gray-500'}`}
+                            className={`w-4 h-4 mr-2 ${isActive('/create-field') ? 'text-white' : 'text-gray-500'}`}
                           />
                           <span>Create New Field</span>
                         </Link>
@@ -199,13 +216,13 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                           to="/field-list"
                           className={`flex items-center px-3 py-2 rounded-md ${
                             isActive('/field-list') 
-                              ? 'bg-blue-100 text-blue-800 font-medium border-l-2 border-blue-500' 
+                              ? 'bg-blue-500 text-white font-medium' 
                               : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'
                           } transition-all duration-200`}
                         >
                           <FontAwesomeIcon
                             icon={faLocationDot}
-                            className={`w-4 h-4 mr-2 ${isActive('/field-list') ? 'text-blue-600' : 'text-gray-500'}`}
+                            className={`w-4 h-4 mr-2 ${isActive('/field-list') ? 'text-white' : 'text-gray-500'}`}
                           />
                           <span>My Fields</span>
                         </Link>
@@ -216,34 +233,87 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
               </ul>
             </div>
 
-            {/* Analytics Sections */}
-            
-
-            {/* AI Assistant */}
-           
-
-            {/* Tools */}
-            <div className={`px-3 py-2 ${!isCollapsed && 'mb-1'}`}>
+            {/* Crop Management */}
+            <div className="mb-4">
               {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider pl-2">
+                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 px-2">
+                  Crop Management
+                </h3>
+              )}
+              <ul className="space-y-1">
+                <li>
+                  <Link
+                    to="/crop-lifecycle"
+                    className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
+                      isActive('/crop-lifecycle') 
+                        ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    } group transition-all duration-200`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faSeedling}
+                      className={`w-5 h-5 ${isActive('/crop-lifecycle') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
+                    />
+                    {!isCollapsed && <span className="ml-3 whitespace-nowrap">Crop Lifecycle</span>}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/crop-prediction"
+                    className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
+                      isActive('/crop-prediction') 
+                        ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    } group transition-all duration-200`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faChartLine}
+                      className={`w-5 h-5 ${isActive('/crop-prediction') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
+                    />
+                    {!isCollapsed && <span className="ml-3 whitespace-nowrap">Crop Prediction</span>}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/yield-prediction"
+                    className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
+                      isActive('/yield-prediction') 
+                        ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    } group transition-all duration-200`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faWheatAwn}
+                      className={`w-5 h-5 ${isActive('/yield-prediction') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
+                    />
+                    {!isCollapsed && <span className="ml-3 whitespace-nowrap">Yield Prediction</span>}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* AI Tools */}
+            <div className="mb-4">
+              {!isCollapsed && (
+                <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 px-2">
                   Tools
                 </h3>
               )}
-              <ul className="mt-1 space-y-1">
+              <ul className="space-y-1">
                 <li>
                   <Link
                     to="/ai-assistant"
                     className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
                       isActive('/ai-assistant') 
-                        ? 'bg-blue-100 text-blue-800 font-medium rounded-lg border-l-4 border-blue-600 shadow-sm' 
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg'
+                        ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                     } group transition-all duration-200`}
                   >
                     <FontAwesomeIcon
                       icon={faRobot}
-                      className={`w-5 h-5 ${isActive('/ai-assistant') ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-900'}`}
+                      className={`w-5 h-5 ${isActive('/ai-assistant') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
                     />
-                    {!isCollapsed && <span className="ml-3 whitespace-nowrap ">AI Assistant</span>}
+                    {!isCollapsed && <span className="ml-3 whitespace-nowrap">AI Assistant</span>}
                   </Link>
                 </li>
               </ul>
@@ -252,10 +322,10 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-auto">
-          <div className="px-3 py-2">
+        <div className="mt-auto border-t border-blue-200 pt-4">
+          <div className="px-3">
             {!isCollapsed && (
-              <h3 className="text-xs font-semibold text-green-700 uppercase tracking-wider mb-1 pl-2">
+              <h3 className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 px-2">
                 Account
               </h3>
             )}
@@ -265,33 +335,17 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                   to="/profile"
                   className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
                     isActive('/profile') 
-                      ? 'bg-blue-100 text-blue-800 font-medium border-l-4 border-blue-500 shadow-sm' 
-                      : 'text-gray-700 hover:bg-blue-500 hover:text-white'
+                      ? 'bg-blue-500 text-white font-medium shadow-sm' 
+                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                   } group transition-all duration-200`}
                 >
                   <FontAwesomeIcon
                     icon={faUser}
-                    className={`w-5 h-5 ${isActive('/profile') ? 'text-gray-700' : 'text-gray-500'} group-hover:text-gray-700`}
+                    className={`w-5 h-5 ${isActive('/profile') ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}
                   />
-                  {!isCollapsed && <span className="ml-3 whitespace-nowrap">Admin</span>}
+                  {!isCollapsed && <span className="ml-3 whitespace-nowrap">Profile</span>}
                 </Link>
-              </li>
-              {/* <li>
-                <Link
-                  to="/settings"
-                  className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} ${
-                    isActive('/settings') 
-                      ? 'bg-gray-100 text-gray-800' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  } group transition-colors duration-150`}
-                >
-                  <FontAwesomeIcon
-                    icon={faCog}
-                    className={`w-5 h-5 ${isActive('/settings') ? 'text-gray-700' : 'text-gray-500'} group-hover:text-gray-700`}
-                  />
-                  {!isCollapsed && <span className="ml-3 whitespace-nowrap">Settings</span>}
-                </Link>
-              </li> */}
+              </li>              
             </ul>
           </div>
         </div>

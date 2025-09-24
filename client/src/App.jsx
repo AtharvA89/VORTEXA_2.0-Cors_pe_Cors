@@ -11,6 +11,9 @@ import FieldDetail from './pages/FieldDetail';
 import FinancialAid from './pages/FinancialAid';
 import WaterManagement from './pages/WaterManagement';
 import PlantDiseaseDetection from './pages/PlantDiseaseDetection';
+import CropLifecycle from './pages/CropLifecycle';
+import CropPrediction from './pages/CropPrediction';
+import YieldPrediction from './pages/YieldPrediction';
 import { AppProvider } from './context/AppContext';
 import VegetationAnalysis from './components/climate/VegetationAnalysis'
 import SoilLandAnalysis from './components/climate/SoilLandAnalysis'
@@ -40,6 +43,9 @@ function App() {
             <Route path="/field-list" element={<Fields />} />
             <Route path="/field-detail/:id" element={<FieldDetail />} />
             <Route path="/plant-disease-detection" element={<PlantDiseaseDetection />} />
+            <Route path="/crop-lifecycle" element={<CropLifecycle />} />
+            <Route path="/crop-prediction" element={<CropPrediction />} />
+            <Route path="/yield-prediction" element={<YieldPrediction />} />
             <Route path="*" element={<h1>Page Not Found</h1>} />
           </Routes>
         </Layout>

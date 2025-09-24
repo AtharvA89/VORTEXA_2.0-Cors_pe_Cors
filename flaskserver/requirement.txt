@@ -8,3 +8,6 @@ joblib
 h5py
 psutil
 matplotlib
+pymongo
+dnspython
+bson

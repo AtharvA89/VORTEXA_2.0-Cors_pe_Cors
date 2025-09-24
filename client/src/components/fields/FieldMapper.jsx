@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMap, faSave, faEraser, faExclamationTriangle, faSeedling } from '@fortawesome/free-solid-svg-icons';
-import { API_URLS } from '../../config';
+import { createField } from '../../services/dataService';
 import googleMapsLoader from '../../utils/googleMapsLoader';
 import './FieldMapper.css';
 
@@ -214,44 +214,27 @@ const FieldMapper = () => {
     setLoading(true);
     
     try {
-      // Generate a unique ID using timestamp + random
-      const fieldId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      // Calculate field area in hectares
+      const area = calculatePolygonArea(coordinates);
       
-      // Create field data object
+      // Create field data object (matching Flask backend schema)
       const fieldData = {
-        id: fieldId,
-        name: fieldName,
+        field_name: fieldName,
         location: fieldLocation,
-        crop: selectedCrop,
         coordinates: coordinates,
-        createdAt: new Date().toISOString()
+        area: area,
+        current_crop: selectedCrop,
+        soil_type: 'Unknown', // Default value
+        status: 'Active'
       };
       
-      console.log('Sending field data to server:', fieldData);
+      console.log('Sending field data to Flask backend:', fieldData);
       
-      // Save to server
-      const response = await fetch(API_URLS.FIELDS, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(fieldData),
-      });
+      // Save to Flask backend using dataService
+      const result = await createField(fieldData);
       
-      const responseText = await response.text();
-      console.log('Server response:', response.status, responseText);
-      
-      let result;
-      try {
-        // Try to parse as JSON
-        result = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        result = { success: false, message: 'Invalid server response' };
-      }
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to save field data');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save field data');
       }
       
       setMessage({
@@ -411,6 +394,27 @@ const FieldMapper = () => {
       )}
     </div>
   );
+};
+
+// Helper function to calculate polygon area in hectares
+const calculatePolygonArea = (coordinates) => {
+  if (!coordinates || coordinates.length < 3) return 0;
+
+  // Implementation of the Shoelace formula to calculate polygon area
+  let area = 0;
+  for (let i = 0; i < coordinates.length; i++) {
+    const j = (i + 1) % coordinates.length;
+    area += coordinates[i].lat * coordinates[j].lng;
+    area -= coordinates[j].lat * coordinates[i].lng;
+  }
+
+  area = Math.abs(area) / 2;
+  
+  // Convert square degrees to hectares
+  const degreeToMeter = 111319.9; // At equator, varies by latitude
+  const squareMetersToHectares = 0.0001;
+  
+  return area * Math.pow(degreeToMeter, 2) * squareMetersToHectares;
 };
 
 export default FieldMapper;

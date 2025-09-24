@@ -1,13 +1,186 @@
 import { parseCSV } from '../utils/dataUtils';
 import { API_URLS } from '../config';
 
-// This service fetches data from our APIs
+// This service handles all API calls to the Flask backend
+
+// Generic API call function with error handling
+const apiCall = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`API call failed for ${url}:`, error);
+    throw error;
+  }
+};
+
+// ============ SERVER STATUS ============
+export const checkServerStatus = async () => {
+  try {
+    const response = await apiCall(API_URLS.STATUS);
+    return response;
+  } catch (error) {
+    return { 
+      status: 'offline', 
+      error: error.message,
+      mongodb_connected: false,
+      ml_models_loaded: false 
+    };
+  }
+};
+
+// ============ FIELD MANAGEMENT ============
+export const createField = async (fieldData) => {
+  return await apiCall(API_URLS.FIELDS, {
+    method: 'POST',
+    body: JSON.stringify(fieldData),
+  });
+};
+
+export const getUserFields = async () => {
+  return await apiCall(API_URLS.FIELDS);
+};
+
+export const getFieldById = async (fieldId) => {
+  return await apiCall(API_URLS.FIELD_BY_ID(fieldId));
+};
+
+export const updateField = async (fieldId, updateData) => {
+  return await apiCall(API_URLS.FIELD_BY_ID(fieldId), {
+    method: 'PUT',
+    body: JSON.stringify(updateData),
+  });
+};
+
+export const deleteField = async (fieldId) => {
+  return await apiCall(API_URLS.FIELD_BY_ID(fieldId), {
+    method: 'DELETE',
+  });
+};
+
+// ============ CROP LIFECYCLE MANAGEMENT ============
+export const createCropLifecycle = async (cropData) => {
+  return await apiCall(API_URLS.CROPS, {
+    method: 'POST',
+    body: JSON.stringify(cropData),
+  });
+};
+
+export const getUserCrops = async () => {
+  return await apiCall(API_URLS.CROPS);
+};
+
+export const getCropById = async (cropId) => {
+  return await apiCall(API_URLS.CROP_BY_ID(cropId));
+};
+
+export const getCropsByField = async (fieldId) => {
+  return await apiCall(API_URLS.CROPS_BY_FIELD(fieldId));
+};
+
+export const updateCropStage = async (cropId, stageData) => {
+  return await apiCall(API_URLS.CROP_STAGE_UPDATE(cropId), {
+    method: 'POST',
+    body: JSON.stringify(stageData),
+  });
+};
+
+export const addIrrigationRecord = async (cropId, irrigationData) => {
+  return await apiCall(API_URLS.CROP_IRRIGATION(cropId), {
+    method: 'POST',
+    body: JSON.stringify(irrigationData),
+  });
+};
+
+export const addFertilizerRecord = async (cropId, fertilizerData) => {
+  return await apiCall(API_URLS.CROP_FERTILIZER(cropId), {
+    method: 'POST',
+    body: JSON.stringify(fertilizerData),
+  });
+};
+
+// ============ YIELD PREDICTION ============
+export const createYieldPrediction = async (predictionData) => {
+  return await apiCall(API_URLS.YIELD_PREDICTIONS, {
+    method: 'POST',
+    body: JSON.stringify(predictionData),
+  });
+};
+
+export const getUserYieldPredictions = async () => {
+  return await apiCall(API_URLS.YIELD_PREDICTIONS);
+};
+
+export const getYieldPredictionById = async (predictionId) => {
+  return await apiCall(API_URLS.YIELD_PREDICTION_BY_ID(predictionId));
+};
+
+export const updateActualYield = async (predictionId, actualData) => {
+  return await apiCall(API_URLS.YIELD_ACTUAL_UPDATE(predictionId), {
+    method: 'POST',
+    body: JSON.stringify(actualData),
+  });
+};
+
+// ============ USER SESSION ============
+export const getUserSession = async () => {
+  return await apiCall(API_URLS.SESSION);
+};
+
+// ============ ML PREDICTIONS ============
+export const predictCropCycle = async (cropType, sowingDate) => {
+  return await apiCall(API_URLS.CROP_CYCLE_PREDICTION, {
+    method: 'POST',
+    body: JSON.stringify({
+      crop_type: cropType,
+      sowing_date: sowingDate,
+    }),
+  });
+};
+
+export const getCropInfo = async (cropType, plantingDate) => {
+  return await apiCall(API_URLS.CROP_INFO, {
+    method: 'POST',
+    body: JSON.stringify({
+      crop_type: cropType,
+      planting_date: plantingDate,
+    }),
+  });
+};
+
+export const getGrowthStages = async () => {
+  return await apiCall(API_URLS.GROWTH_STAGES);
+};
+
+export const getIrrigationSchedule = async () => {
+  return await apiCall(API_URLS.IRRIGATION_SCHEDULE);
+};
+
+export const getFertilizerSchedule = async () => {
+  return await apiCall(API_URLS.FERTILIZER_SCHEDULE);
+};
+
+export const getWaterBalance = async () => {
+  return await apiCall(API_URLS.WATER_BALANCE);
+};
+
+// ============ LEGACY FUNCTIONS (with fallback) ============
 
 // Function to fetch vegetation indices data
 export const fetchVegetationIndices = async (indexName) => {
   try {
-    // In a real application, this would be an API call
-    // For now, we'll simulate loading a CSV file
     const response = await fetch(`/local_csv/${indexName}.csv`);
     const csvData = await response.text();
     return parseCSV(csvData);
@@ -19,8 +192,6 @@ export const fetchVegetationIndices = async (indexName) => {
 
 // Function to fetch weather forecast data
 export const fetchWeatherForecast = async (location) => {
-  // This would be an API call to a weather service
-  // For now, return mock data
   return {
     location,
     forecast: [
@@ -33,26 +204,28 @@ export const fetchWeatherForecast = async (location) => {
   };
 };
 
-// Function to fetch all fields
+// Function to fetch all fields (with Flask backend integration)
 export const fetchFields = async () => {
   try {
-    const response = await fetch(API_URLS.FIELDS);
+    const response = await getUserFields();
     
-    if (!response.ok) {
-      throw new Error(`Error fetching fields: ${response.status}`);
+    if (response.success && Array.isArray(response.data)) {
+      return response.data.map(field => ({
+        id: field._id || field.id,
+        name: field.field_name,
+        crop: field.current_crop || 'Not specified',
+        area: field.area || 0,
+        status: field.status || 'Active',
+        lastIrrigated: field.last_irrigated || new Date().toISOString().split('T')[0],
+        soilMoisture: field.soil_moisture || Math.floor(Math.random() * 20) + 60,
+        coordinates: field.coordinates || []
+      }));
     }
     
-    const data = await response.json();
-    
-    if (!data.success || !Array.isArray(data.fields)) {
-      throw new Error('Invalid response format');
-    }
-    
-    return data.fields;
+    throw new Error('Invalid response format');
   } catch (error) {
-    console.warn('API not available, using fallback field data:', error.message);
+    console.warn('Flask API not available, using fallback field data:', error.message);
     
-    // Return mock data when API is not available
     return [
       {
         id: 1,
@@ -88,57 +261,51 @@ export const fetchFields = async () => {
   }
 };
 
-// Function to fetch a specific field by ID
+// Function to fetch a specific field by ID (with Flask backend integration)
 export const fetchFieldData = async (fieldId) => {
   try {
-    const response = await fetch(`${API_URLS.FIELDS}/${fieldId}`);
+    const response = await getFieldById(fieldId);
     
-    if (!response.ok) {
-      throw new Error(`Error fetching field data: ${response.status}`);
+    if (response.success && response.data) {
+      const field = response.data;
+      const fieldSize = calculateFieldArea(field.coordinates || []);
+      
+      return {
+        id: field._id || field.id,
+        name: field.field_name,
+        size: fieldSize.toFixed(2),
+        location: field.location || 'Unknown',
+        crop: field.current_crop || 'Not specified',
+        crops: [field.current_crop || 'Not specified'],
+        mainCrop: field.current_crop || 'Not specified',
+        soilType: field.soil_type || 'Clay Loam',
+        plantingDate: field.planting_date || '2025-06-10',
+        coordinates: field.coordinates || [],
+        ndviHistory: field.ndvi_history || [
+          { date: '2025-07-15', value: 0.65 },
+          { date: '2025-07-22', value: 0.68 },
+          { date: '2025-07-29', value: 0.72 },
+          { date: '2025-08-05', value: 0.75 },
+          { date: '2025-08-12', value: 0.78 },
+        ]
+      };
     }
     
-    const data = await response.json();
-    
-    if (!data.success || !data.field) {
-      throw new Error('Invalid response format');
-    }
-    
-    // Calculate field size in acres from coordinates
-    const fieldSize = calculateFieldArea(data.field.coordinates);
-    
-    // Add additional properties needed for the dashboard
-    // Handle the field with crop data
-    const crop = data.field.crop || 'Not specified';
-    
-    return {
-      ...data.field,
-      size: fieldSize.toFixed(2), // converted to acres
-      crops: [crop], // Use the crop from the field data
-      mainCrop: crop, // Add main crop directly for easy access
-      soilType: 'Clay Loam',
-      plantingDate: '2025-06-10',
-      ndviHistory: [
-        { date: '2025-07-15', value: 0.65 },
-        { date: '2025-07-22', value: 0.68 },
-        { date: '2025-07-29', value: 0.72 },
-        { date: '2025-08-05', value: 0.75 },
-        { date: '2025-08-12', value: 0.78 },
-      ]
-    };
+    throw new Error('Invalid response format');
   } catch (error) {
-    console.warn('API not available for field update:', error.message);
+    console.warn('Flask API not available for field data:', error.message);
     
-    // Return mock success response when API is not available
     return {
       id: fieldId,
       name: `Field ${fieldId}`,
-      size: 20, // acres
+      size: 20,
       location: 'Unknown',
-      crop: 'Wheat', // Default crop
+      crop: 'Wheat',
       crops: ['Wheat'],
       mainCrop: 'Wheat',
       soilType: 'Clay Loam',
       plantingDate: '2025-06-10',
+      coordinates: [],
       ndviHistory: [
         { date: '2025-07-15', value: 0.65 },
         { date: '2025-07-22', value: 0.68 },
@@ -150,51 +317,23 @@ export const fetchFieldData = async (fieldId) => {
   }
 };
 
-// Function to update manipal.json with coordinates from a selected field
+// Function to update manipal.json (legacy compatibility)
 export const updateManipalCoordinates = async (fieldId) => {
-  try {
-    if (!fieldId) {
-      console.warn('Field ID is required to update manipal.json');
-      return { success: false, message: 'Field ID is required' };
-    }
-    
-    const response = await fetch(API_URLS.UPDATE_MANIPAL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ fieldId }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Error updating manipal.json: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to update manipal.json');
-    }
-    
-    console.log('manipal.json updated successfully with coordinates for field:', fieldId);
-    return data;
-  } catch (error) {
-    console.warn('API not available, using fallback for manipal.json update:', error.message);
-    // Return success in offline mode to prevent error propagation
-    return { 
-      success: true, 
-      message: 'API unavailable - manipal.json update skipped (offline mode)',
-      offline: true 
-    };
+  if (!fieldId) {
+    return { success: false, message: 'Field ID is required' };
   }
+  
+  return { 
+    success: true, 
+    message: 'Feature not implemented in Flask backend',
+    offline: true 
+  };
 };
 
 // Helper function to calculate field area in acres from coordinates
 function calculateFieldArea(coordinates) {
   if (!coordinates || coordinates.length < 3) return 0;
 
-  // Implementation of the Shoelace formula to calculate polygon area
   let area = 0;
   for (let i = 0; i < coordinates.length; i++) {
     const j = (i + 1) % coordinates.length;
@@ -204,10 +343,9 @@ function calculateFieldArea(coordinates) {
 
   area = Math.abs(area) / 2;
   
-  // Convert square degrees to hectares
-  const degreeToMeter = 111319.9; // At equator, varies by latitude
+  const degreeToMeter = 111319.9;
   const squareMetersToHectares = 0.0001;
   const hectaresToAcres = 2.47105;
   
   return area * Math.pow(degreeToMeter, 2) * squareMetersToHectares * hectaresToAcres;
-};
+}

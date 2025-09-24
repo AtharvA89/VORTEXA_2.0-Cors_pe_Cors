@@ -8,8 +8,39 @@ import joblib
 from datetime import datetime, timedelta
 import traceback
 
+# MongoDB imports
+from config.database import init_database
+from services.database_service import (
+    FieldMapService, 
+    CropLifecycleService, 
+    YieldPredictionService, 
+    UserSessionService,
+    get_user_session_id
+)
+
 app = Flask(__name__)
 CORS(app)
+
+# Initialize database
+print("Initializing MongoDB connection...")
+mongodb_connected = init_database()
+
+# Initialize services (only if MongoDB is connected)
+field_service = None
+crop_service = None
+yield_service = None 
+session_service = None
+
+if mongodb_connected:
+    try:
+        field_service = FieldMapService()
+        crop_service = CropLifecycleService()
+        yield_service = YieldPredictionService()
+        session_service = UserSessionService()
+        print("✅ MongoDB services initialized")
+    except Exception as e:
+        print(f"❌ Failed to initialize MongoDB services: {e}")
+        mongodb_connected = False
 
 # ML Model Functions
 def load_models(models_dir='../models/trained_models'):
@@ -212,6 +243,21 @@ crop_data_example = {
 def home():
     return jsonify({"message": "Crop Prediction API is running!"})
 
+@app.route('/api/status')
+def api_status():
+    """Get API status including MongoDB connection"""
+    return jsonify({
+        "status": "running",
+        "mongodb_connected": mongodb_connected,
+        "ml_models_loaded": DURATION_MODELS is not None,
+        "services_available": {
+            "field_mapping": field_service is not None,
+            "crop_lifecycle": crop_service is not None,
+            "yield_prediction": yield_service is not None,
+            "user_sessions": session_service is not None
+        }
+    })
+
 @app.route('/predict-crop-cycle', methods=['POST'])
 def predict_crop_cycle():
     """
@@ -301,5 +347,467 @@ def get_fertilizer_schedule():
 def get_water_balance_summary():
     return jsonify(crop_data_example["water_balance_summary"])
 
+# ============ NEW MONGODB ENDPOINTS ============
+
+def check_mongodb_available():
+    """Check if MongoDB services are available"""
+    if not mongodb_connected or not field_service:
+        return jsonify({
+            'error': 'MongoDB is not available. Please check connection and try again.',
+            'mongodb_status': 'disconnected'
+        }), 503
+    return None
+
+# Field Mapping Endpoints
+@app.route('/api/fields', methods=['POST'])
+def create_field_map():
+    """Create a new field map"""
+    # Check MongoDB availability
+    mongo_check = check_mongodb_available()
+    if mongo_check:
+        return mongo_check
+        
+    try:
+        user_id = get_user_session_id(request)
+        field_data = request.json
+        
+        # Validate required fields
+        required_fields = ['field_name', 'coordinates', 'area']
+        for field in required_fields:
+            if not field_data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        field_map = field_service.create_field_map(user_id, field_data)
+        session_service.update_session_stats(user_id, 'fields')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Field map created successfully',
+            'data': field_map
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/fields', methods=['GET'])
+def get_user_fields():
+    """Get all field maps for current user"""
+    try:
+        user_id = get_user_session_id(request)
+        fields = field_service.get_field_maps_by_user(user_id)
+        
+        return jsonify({
+            'success': True,
+            'data': fields
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/fields/<field_id>', methods=['GET'])
+def get_field_map(field_id):
+    """Get a specific field map"""
+    try:
+        field = field_service.get_field_map_by_id(field_id)
+        
+        if not field:
+            return jsonify({'error': 'Field not found'}), 404
+            
+        return jsonify({
+            'success': True,
+            'data': field
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/fields/<field_id>', methods=['PUT'])
+def update_field_map(field_id):
+    """Update a field map"""
+    try:
+        update_data = request.json
+        field = field_service.update_field_map(field_id, update_data)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Field map updated successfully',
+            'data': field
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/fields/<field_id>', methods=['DELETE'])
+def delete_field_map(field_id):
+    """Delete a field map"""
+    try:
+        success = field_service.delete_field_map(field_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Field map deleted successfully'
+            })
+        else:
+            return jsonify({'error': 'Field not found or could not be deleted'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Crop Lifecycle Endpoints
+@app.route('/api/crops', methods=['POST'])
+def create_crop_lifecycle():
+    """Create a new crop lifecycle"""
+    try:
+        user_id = get_user_session_id(request)
+        lifecycle_data = request.json
+        
+        # Validate required fields
+        required_fields = ['field_id', 'crop_name', 'sowing_date']
+        for field in required_fields:
+            if not lifecycle_data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # If we have the ML models, use them to generate predictions
+        if DURATION_MODELS and IRRIGATION_MODELS and FEATURE_COLUMNS:
+            try:
+                # Generate weather and soil data if not provided
+                weather_data = {
+                    'temperature': lifecycle_data.get('temperature') or generate_weather_data(lifecycle_data['sowing_date'])['temperature'],
+                    'rainfall': lifecycle_data.get('rainfall') or generate_weather_data(lifecycle_data['sowing_date'])['rainfall'],
+                    'humidity': lifecycle_data.get('humidity') or generate_weather_data(lifecycle_data['sowing_date'])['humidity']
+                }
+                
+                soil_data = {
+                    'moisture': lifecycle_data.get('soil_moisture') or generate_soil_data()['moisture']
+                }
+                
+                # Make ML prediction
+                ml_prediction = predict_crop_timeline_and_irrigation(
+                    crop_type=lifecycle_data['crop_name'],
+                    sow_date_str=lifecycle_data['sowing_date'],
+                    weather_data=weather_data,
+                    soil_data=soil_data,
+                    all_feature_cols=FEATURE_COLUMNS,
+                    duration_models=DURATION_MODELS,
+                    irrigation_models=IRRIGATION_MODELS
+                )
+                
+                # Add ML predictions to lifecycle data
+                lifecycle_data['growth_stages'] = ml_prediction.get('timeline', [])
+                lifecycle_data['irrigation_schedule'] = ml_prediction.get('irrigation_schedule', [])
+                lifecycle_data['expected_harvest_date'] = ml_prediction.get('harvest_date')
+                lifecycle_data['total_irrigation'] = sum(
+                    float(stage.get('Irrigation_Need', '0').replace(' lphw', ''))
+                    for stage in ml_prediction.get('timeline', [])
+                )
+                
+            except Exception as ml_error:
+                print(f"ML prediction failed: {ml_error}")
+                # Continue without ML predictions
+        
+        crop_lifecycle = crop_service.create_crop_lifecycle(user_id, lifecycle_data)
+        session_service.update_session_stats(user_id, 'crops')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Crop lifecycle created successfully',
+            'data': crop_lifecycle
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops', methods=['GET'])
+def get_user_crops():
+    """Get all crop lifecycles for current user"""
+    try:
+        user_id = get_user_session_id(request)
+        crops = crop_service.get_crop_lifecycles_by_user(user_id)
+        
+        return jsonify({
+            'success': True,
+            'data': crops
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops/<crop_id>', methods=['GET'])
+def get_crop_lifecycle(crop_id):
+    """Get a specific crop lifecycle"""
+    try:
+        crop = crop_service.get_crop_lifecycle_by_id(crop_id)
+        
+        if not crop:
+            return jsonify({'error': 'Crop lifecycle not found'}), 404
+            
+        return jsonify({
+            'success': True,
+            'data': crop
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops/field/<field_id>', methods=['GET'])
+def get_field_crops(field_id):
+    """Get all crop lifecycles for a specific field"""
+    try:
+        crops = crop_service.get_crop_lifecycles_by_field(field_id)
+        
+        return jsonify({
+            'success': True,
+            'data': crops
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops/<crop_id>/stage', methods=['POST'])
+def update_crop_stage(crop_id):
+    """Update current crop growth stage"""
+    try:
+        stage_data = request.json
+        
+        if not stage_data.get('stage_name'):
+            return jsonify({'error': 'Missing stage_name'}), 400
+        
+        success = crop_service.update_crop_stage(crop_id, **stage_data)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Crop stage updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Could not update crop stage'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops/<crop_id>/irrigation', methods=['POST'])
+def add_irrigation_record(crop_id):
+    """Add irrigation record to crop lifecycle"""
+    try:
+        irrigation_data = request.json
+        
+        required_fields = ['date', 'amount']
+        for field in required_fields:
+            if field not in irrigation_data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        success = crop_service.add_irrigation_record(crop_id, irrigation_data)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Irrigation record added successfully'
+            })
+        else:
+            return jsonify({'error': 'Could not add irrigation record'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/crops/<crop_id>/fertilizer', methods=['POST'])
+def add_fertilizer_record(crop_id):
+    """Add fertilizer application record to crop lifecycle"""
+    try:
+        fertilizer_data = request.json
+        
+        required_fields = ['date', 'nutrient_type', 'amount', 'application_method']
+        for field in required_fields:
+            if field not in fertilizer_data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        success = crop_service.add_fertilizer_record(crop_id, fertilizer_data)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Fertilizer record added successfully'
+            })
+        else:
+            return jsonify({'error': 'Could not add fertilizer record'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Yield Prediction Endpoints
+@app.route('/api/yield-predictions', methods=['POST'])
+def create_yield_prediction():
+    """Create a new yield prediction"""
+    try:
+        user_id = get_user_session_id(request)
+        prediction_data = request.json
+        
+        # Validate required fields
+        required_fields = ['field_id', 'crop_lifecycle_id', 'crop_name']
+        for field in required_fields:
+            if not prediction_data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Here you would typically run your ML model for yield prediction
+        # For now, we'll generate some realistic predictions based on input parameters
+        
+        # Calculate expected yield based on parameters (simplified logic)
+        base_yield = {
+            'rice': 5.5,
+            'wheat': 4.8,
+            'corn': 9.2,
+            'maize': 9.2,
+            'sugarcane': 75.0,
+            'cotton': 2.8,
+            'soybean': 3.2
+        }
+        
+        crop_name = prediction_data.get('crop_name', '').lower()
+        field_area = prediction_data.get('field_area', 1.0)
+        
+        # Get base yield for crop type
+        expected_yield_per_ha = base_yield.get(crop_name, 4.0)
+        
+        # Apply modifiers based on soil parameters
+        nitrogen = prediction_data.get('nitrogen', 25)
+        phosphorus = prediction_data.get('phosphorus', 15)
+        potassium = prediction_data.get('potassium', 20)
+        ph = prediction_data.get('ph', 6.5)
+        
+        # Simple yield modification based on soil parameters
+        yield_modifier = 1.0
+        
+        # Nitrogen effect (optimal around 30)
+        if 25 <= nitrogen <= 35:
+            yield_modifier *= 1.1
+        elif nitrogen < 15 or nitrogen > 45:
+            yield_modifier *= 0.9
+        
+        # pH effect (optimal 6.0-7.5)
+        if 6.0 <= ph <= 7.5:
+            yield_modifier *= 1.05
+        elif ph < 5.5 or ph > 8.0:
+            yield_modifier *= 0.85
+        
+        final_yield_per_ha = expected_yield_per_ha * yield_modifier
+        total_yield = final_yield_per_ha * field_area
+        
+        # Add calculated predictions to data
+        prediction_data.update({
+            'expected_yield': round(final_yield_per_ha, 2),
+            'total_yield': round(total_yield, 2),
+            'confidence_score': round(min(95, max(70, 85 + (yield_modifier - 1) * 100)), 1),
+            'quality_grade': 'A' if yield_modifier > 1.05 else 'B' if yield_modifier > 0.95 else 'C',
+            'risk_factors': [],
+            'recommendations': []
+        })
+        
+        # Add risk factors based on parameters
+        if nitrogen < 20:
+            prediction_data['risk_factors'].append('Low nitrogen levels may reduce yield')
+            prediction_data['recommendations'].append('Consider nitrogen fertilizer application')
+        
+        if ph < 6.0:
+            prediction_data['risk_factors'].append('Acidic soil may affect nutrient uptake')
+            prediction_data['recommendations'].append('Consider lime application to increase pH')
+        elif ph > 8.0:
+            prediction_data['risk_factors'].append('Alkaline soil may limit nutrient availability')
+            prediction_data['recommendations'].append('Consider sulfur application to decrease pH')
+        
+        if prediction_data.get('irrigation_total', 0) < 200:
+            prediction_data['risk_factors'].append('Insufficient irrigation may impact yield')
+            prediction_data['recommendations'].append('Ensure adequate water supply during critical growth stages')
+        
+        yield_prediction = yield_service.create_yield_prediction(user_id, prediction_data)
+        session_service.update_session_stats(user_id, 'predictions')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Yield prediction created successfully',
+            'data': yield_prediction
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/yield-predictions', methods=['GET'])
+def get_user_yield_predictions():
+    """Get all yield predictions for current user"""
+    try:
+        user_id = get_user_session_id(request)
+        predictions = yield_service.get_yield_predictions_by_user(user_id)
+        
+        return jsonify({
+            'success': True,
+            'data': predictions
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/yield-predictions/<prediction_id>', methods=['GET'])
+def get_yield_prediction(prediction_id):
+    """Get a specific yield prediction"""
+    try:
+        prediction = yield_service.get_yield_prediction_by_id(prediction_id)
+        
+        if not prediction:
+            return jsonify({'error': 'Yield prediction not found'}), 404
+            
+        return jsonify({
+            'success': True,
+            'data': prediction
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/yield-predictions/<prediction_id>/actual', methods=['POST'])
+def update_actual_yield(prediction_id):
+    """Update prediction with actual harvest results"""
+    try:
+        actual_data = request.json
+        
+        required_fields = ['actual_yield', 'actual_harvest_date', 'quality_achieved']
+        for field in required_fields:
+            if field not in actual_data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        success = yield_service.update_actual_results(
+            prediction_id,
+            actual_data['actual_yield'],
+            actual_data['actual_harvest_date'],
+            actual_data['quality_achieved']
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Actual results updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Could not update actual results'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# User Session Endpoint
+@app.route('/api/session', methods=['GET'])
+def get_user_session():
+    """Get current user session information"""
+    try:
+        user_id = get_user_session_id(request)
+        ip_address = request.remote_addr or 'unknown'
+        
+        session = session_service.create_or_get_session(ip_address)
+        
+        return jsonify({
+            'success': True,
+            'data': session
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=False, port=5002)

@@ -140,29 +140,16 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
-      role: req.isAdminLogin ? 'admin' : 'user'
+      role: req.isAdminLogin ? 'admin' : 'user',
+      isEmailVerified: true // Skip email verification
     });
-
-    // Generate OTP for verification
-    const otp = user.generateOTP();
-    await user.save();
-
-    // Send verification email
-    const emailSent = await sendOTPEmail(email, otp);
-
-    if (!emailSent) {
-      return res.status(500).json({
-        success: false,
-        message: 'Error sending verification email'
-      });
-    }
 
     res.status(200).json({
       success: true,
-      message: `${req.isAdminLogin ? 'Admin' : 'User'} registered. Please check your email for verification code.`,
+      message: `${req.isAdminLogin ? 'Admin' : 'User'} registered successfully. You can now login.`,
       data: {
         email,
-        otp: process.env.NODE_ENV === 'development' ? otp : undefined
+        userId: user._id
       }
     });
   } catch (error) {

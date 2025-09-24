@@ -40,9 +40,8 @@ exports.googleCallback = async (req, res) => {
     // Generate JWT token
     const token = generateToken(req.user);
 
-    // Redirect to appropriate dashboard
-    const redirectPath = req.user.role === 'admin' ? '/admin/dashboard' : '/dashboard';
-    res.redirect(`${process.env.CLIENT_URL}${redirectPath}?token=${token}`);
+    // Redirect to auth callback handler
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
   } catch (error) {
     res.redirect(`${process.env.CLIENT_URL}/auth/failure`);
   }
@@ -62,8 +61,8 @@ exports.facebookCallback = async (req, res) => {
     // Generate JWT token
     const token = generateToken(req.user);
 
-    // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${token}`);
+    // Redirect to auth callback handler
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
   } catch (error) {
     res.redirect(`${process.env.CLIENT_URL}/auth/failure`);
   }
